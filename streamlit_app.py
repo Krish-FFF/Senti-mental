@@ -1,12 +1,3 @@
-# requirements.txt
-# streamlit
-# pandas
-# tweepy
-# nltk
-# transformers
-# torch
-# scipy
-
 import streamlit as st
 import pandas as pd
 import tweepy
@@ -22,13 +13,13 @@ nltk.download('vader_lexicon')
 def twitter_auth_v2(bearer_token):
     return tweepy.Client(bearer_token=bearer_token)
 
-# Fetch tweets using Twitter API v2
+# Fetch last 5 tweets using Twitter API v2
 def fetch_tweets_v2(client, username, count=5):
     user = client.get_user(username=username)
     user_id = user.data.id
 
     tweets = client.get_users_tweets(
-        id=user_id, max_results=count, tweet_fields=['text']
+        id=user_id, max_results=5, tweet_fields=['text']
     )
 
     return [tweet.text for tweet in tweets.data]
