@@ -5,3 +5,4 @@ nltk
 transformers
 torch
 scipy
+matplotlib
