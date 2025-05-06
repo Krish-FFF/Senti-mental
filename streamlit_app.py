@@ -18,16 +18,20 @@ from scipy.special import softmax
 # Download required NLTK resources
 nltk.download('vader_lexicon')
 
-# Set up Twitter API client
-def twitter_auth(consumer_key, consumer_secret, access_token, access_token_secret):
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token(access_token, access_token_secret)
-    return tweepy.API(auth)
+# Twitter API v2 client
+def twitter_auth_v2(bearer_token):
+    return tweepy.Client(bearer_token=bearer_token)
 
-# Fetch recent tweets
-def fetch_tweets(api, username, count=5):
-    tweets = api.user_timeline(screen_name=username, count=count, tweet_mode='extended')
-    return [tweet.full_text for tweet in tweets]
+# Fetch tweets using Twitter API v2
+def fetch_tweets_v2(client, username, count=5):
+    user = client.get_user(username=username)
+    user_id = user.data.id
+
+    tweets = client.get_users_tweets(
+        id=user_id, max_results=count, tweet_fields=['text']
+    )
+
+    return [tweet.text for tweet in tweets.data]
 
 # Sentiment analysis using NLTK VADER
 def analyze_vader(text):
@@ -48,14 +52,11 @@ def analyze_roberta(text, tokenizer, model):
 # Streamlit UI setup
 st.title("🐦 Twitter Sentiment Analyzer")
 
-# Sidebar for API credentials
-st.sidebar.header("Twitter API Credentials")
-consumer_key = st.sidebar.text_input("Consumer Key")
-consumer_secret = st.sidebar.text_input("Consumer Secret")
-access_token = st.sidebar.text_input("Access Token")
-access_token_secret = st.sidebar.text_input("Access Token Secret")
+# Sidebar for Twitter API v2
+st.sidebar.header("Twitter API v2 Credentials")
+bearer_token = st.sidebar.text_input("Bearer Token", type="password")
 
-# Main UI for username input
+# Main UI
 username = st.text_input("Enter Twitter Username (without @):")
 fetch_button = st.button("Analyze Sentiment")
 
@@ -71,12 +72,12 @@ tokenizer, model = load_roberta()
 
 # When button clicked
 if fetch_button:
-    if not all([consumer_key, consumer_secret, access_token, access_token_secret, username]):
-        st.error("Please provide all API credentials and username.")
+    if not all([bearer_token, username]):
+        st.error("Please provide Bearer token and username.")
     else:
         try:
-            api = twitter_auth(consumer_key, consumer_secret, access_token, access_token_secret)
-            tweets = fetch_tweets(api, username)
+            client = twitter_auth_v2(bearer_token)
+            tweets = fetch_tweets_v2(client, username)
 
             results = []
             for tweet in tweets:
