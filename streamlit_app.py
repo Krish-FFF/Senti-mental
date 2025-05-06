@@ -6,7 +6,6 @@
 # transformers
 # torch
 # scipy
-# matplotlib
 
 import streamlit as st
 import pandas as pd
@@ -15,7 +14,6 @@ import nltk
 from nltk.sentiment import SentimentIntensityAnalyzer
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
-import matplotlib.pyplot as plt
 
 # Download required NLTK resources
 nltk.download('vader_lexicon')
@@ -96,17 +94,6 @@ if fetch_button:
             df = pd.DataFrame(results)
             st.write("### Analysis Results")
             st.dataframe(df)
-
-            # Visualization
-            st.write("### Sentiment Distribution")
-            sentiment_counts = df['RoBERTa Sentiment'].value_counts()
-            fig, ax = plt.subplots()
-            sentiment_counts.plot(kind='bar', ax=ax, color=['green', 'gray', 'red'])
-            plt.xlabel('Sentiment')
-            plt.ylabel('Number of Tweets')
-            plt.title('Sentiment Distribution of Last 5 Tweets')
-            plt.xticks(rotation=0)
-            st.pyplot(fig)
 
         except Exception as e:
             st.error(f"An error occurred: {e}")
